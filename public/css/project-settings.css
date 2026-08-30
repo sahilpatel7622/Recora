@@ -1,0 +1,304 @@
+.settings-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.settings-sidebar {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
+}
+
+.settings-sidebar-title {
+    padding: 12px 14px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.settings-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 12px 14px;
+    margin-bottom: 5px;
+    border-radius: 10px;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.settings-menu-item i {
+    width: 18px;
+    text-align: center;
+    font-size: 15px;
+}
+
+.settings-menu-item:hover {
+    background: #f1f5ff;
+    color: #2563eb;
+}
+
+.settings-menu-item.active {
+    background: #eef2ff;
+    color: #4f46e5;
+}
+
+.settings-content {
+    min-width: 0;
+}
+
+.settings-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
+}
+
+.settings-card-header {
+    padding-bottom: 18px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid #eef0f4;
+}
+
+.settings-card-header h3 {
+    margin: 0 0 5px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.settings-card-header p {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.form-group input[type="text"],
+.form-group input[type="file"],
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #dbe1ea;
+    border-radius: 9px;
+    padding: 11px 13px;
+    font-size: 14px;
+    color: #1e293b;
+    background: #ffffff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="file"]:focus,
+.form-group input[type="email"]:focus,
+.form-group input[type="password"]:focus,
+.form-group textarea:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.10);
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.logo-preview {
+    width: 130px;
+    height: 130px;
+    margin-bottom: 20px;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+}
+
+.logo-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+.settings-card button[type="submit"] {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    border-radius: 9px;
+    padding: 11px 18px;
+    background: #4f46e5;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.settings-card button[type="submit"]:hover {
+    background: #4338ca;
+    transform: translateY(-1px);
+}
+
+.empty-settings {
+    text-align: center;
+    padding: 45px 20px;
+    color: #64748b;
+}
+
+.empty-settings i {
+    font-size: 32px;
+    margin-bottom: 12px;
+    color: #6366f1;
+}
+
+.empty-settings h4 {
+    margin: 0 0 5px;
+    font-size: 17px;
+    color: #334155;
+}
+
+.empty-settings p {
+    margin: 0;
+    font-size: 13px;
+}
+
+.form-group select {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #dbe1ea;
+    border-radius: 9px;
+    padding: 11px 13px;
+    font-size: 14px;
+    color: #1e293b;
+    background: #ffffff;
+    outline: none;
+}
+
+.form-group select:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.10);
+}
+
+.test-email-section {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
+}
+
+.test-email-form {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.test-email-form input {
+    flex: 1;
+    box-sizing: border-box;
+    border: 1px solid #dbe1ea;
+    border-radius: 9px;
+    padding: 11px 13px;
+    font-size: 14px;
+    color: #1e293b;
+    outline: none;
+}
+
+.test-email-form input:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.10);
+}
+
+.test-email-form button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    border-radius: 9px;
+    padding: 11px 18px;
+    background: #4f46e5;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.test-email-form button:hover {
+    background: #4338ca;
+}
+
+
+@media (max-width: 900px) {
+    .settings-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-sidebar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .settings-sidebar-title {
+        width: 100%;
+        padding-bottom: 8px;
+    }
+
+    .settings-menu-item {
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 640px) {
+    .settings-card {
+        padding: 18px;
+    }
+
+    .settings-card-header h3 {
+        font-size: 18px;
+    }
+
+    .settings-sidebar {
+        padding: 8px;
+    }
+
+    .settings-menu-item {
+        flex: 1;
+        justify-content: center;
+        padding: 10px 8px;
+    }
+        .test-email-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .test-email-form button {
+        justify-content: center;
+    }
+}
