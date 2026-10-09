@@ -72,6 +72,14 @@
 
 </div>
 
+<style>
+    /* Force remove the bottom border on the last row of the table to prevent double lines */
+    .users-table tbody tr:last-child,
+    .users-table tbody tr:last-child td {
+        border-bottom: 0px !important;
+    }
+</style>
+
 <div class="users-main-card">
 
     <div class="users-card-header">
@@ -100,15 +108,44 @@
 
         </div>
 
-        <div class="users-header-actions">
+        <div class="users-header-actions" style="display: flex; gap: 10px; align-items: center;">
 
-            <form action="{{ route('admin.users.index') }}"
+            @if($users->total() > 0)
+                <div class="header-middle-section" style="margin-left: auto; margin-right: 15px;">
+                    <form action="{{ route('admin.users.index') }}" method="GET" id="perPageForm" style="margin: 0;">
+                        <input type="hidden" name="filter" value="{{ $filter }}">
+                        <input type="hidden" name="search" value="{{ $search }}">
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #475569; font-weight: 500;">
+                            Show 
+                            <div style="position: relative;">
+                                <select name="per_page" id="per_page" onchange="document.getElementById('perPageForm').submit()" style="appearance: none; padding: 8px 32px 8px 14px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; background: linear-gradient(to bottom, #ffffff, #f8fafc); color: #0f172a; font-size: 14px; cursor: pointer; font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s;">
+                                    <option value="10" {{ request('per_page') == 10 ? 'selected' : '' }}>10</option>
+                                    <option value="25" {{ request('per_page') == 25 ? 'selected' : '' }}>25</option>
+                                    <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50</option>
+                                    <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100</option>
+                                </select>
+                                <i class="fa-solid fa-angle-down" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 12px; color: #64748b; pointer-events: none;"></i>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <a href="{{ route('admin.users.export.pdf', ['filter' => request('filter'), 'search' => request('search')]) }}" class="export-pdf-btn" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; font-size: 14px; font-weight: 600; border-radius: 10px; text-decoration: none; transition: all 0.2s ease;">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    Export PDF
+                </a>
+            @endif
+
+            @if($users->total() > 0 || $search !== '')
+                <form action="{{ route('admin.users.index') }}"
                   method="GET"
-                  class="users-search-form">
+                  class="users-search-form"
+                  style="margin: 0;">
 
                 <input type="hidden"
                        name="filter"
                        value="{{ $filter }}">
+                <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
 
                 <div class="users-search-box">
 
@@ -124,6 +161,7 @@
                 </div>
 
             </form>
+            @endif
 
             @if($filter !== 'deleted')
 
@@ -167,8 +205,8 @@
 
                     <tr>
 
-                        <td style="color: green;">
-                            #{{ $user->id }}
+                        <td style="color: #64748b; font-weight: 500;">
+                            {{ $users->firstItem() + $loop->index }}
                         </td>
 
                         <td>
@@ -397,12 +435,43 @@
 
     </div>
 
-    @if($users->hasPages())
-
-        <div class="users-pagination">
-            {{ $users->links() }}
+    @if($users->total() > 0)
+        <div class="users-pagination-wrapper" style="display: flex; justify-content: space-between; align-items: center; padding: 2px 24px 2px 24px; background: #fff; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; width: 100%;">
+            <div class="users-pagination" style="display: block; width: 100%; margin: 0;">
+            @if($users->hasPages())
+                {{ $users->links() }}
+            @else
+                <nav role="navigation" aria-label="Pagination Navigation" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                    <div>
+                        <p style="font-size: 0.875rem; color: #374151; line-height: 1.25rem; margin: 0;">
+                            Showing <span style="font-weight: 600;">1</span> to <span style="font-weight: 600;">{{ $users->count() }}</span> of <span style="font-weight: 600;">{{ $users->total() }}</span> results
+                        </p>
+                    </div>
+                    <div>
+                        <span style="position: relative; z-index: 0; display: inline-flex; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); border-radius: 0.375rem;">
+                            <span aria-disabled="true" aria-label="&laquo; Previous">
+                                <span style="position: relative; display: inline-flex; align-items: center; padding: 0.5rem 0.75rem; font-size: 0.875rem; font-weight: 500; color: #9ca3af; background-color: #ffffff; border: 1px solid #d1d5db; cursor: not-allowed; border-top-left-radius: 0.375rem; border-bottom-left-radius: 0.375rem; line-height: 1.25rem;" aria-hidden="true">
+                                    <svg style="width: 1.25rem; height: 1.25rem;" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </span>
+                            </span>
+                            <span aria-current="page">
+                                <span style="position: relative; display: inline-flex; align-items: center; padding: 0.5rem 1rem; margin-left: -1px; font-size: 0.875rem; font-weight: 600; color: #2563eb; background-color: #eff6ff; border: 1px solid #d1d5db; cursor: default; line-height: 1.25rem;">1</span>
+                            </span>
+                            <span aria-disabled="true" aria-label="Next &raquo;">
+                                <span style="position: relative; display: inline-flex; align-items: center; padding: 0.5rem 0.75rem; margin-left: -1px; font-size: 0.875rem; font-weight: 500; color: #9ca3af; background-color: #ffffff; border: 1px solid #d1d5db; cursor: not-allowed; border-top-right-radius: 0.375rem; border-bottom-right-radius: 0.375rem; line-height: 1.25rem;" aria-hidden="true">
+                                    <svg style="width: 1.25rem; height: 1.25rem;" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </span>
+                            </span>
+                        </span>
+                    </div>
+                </nav>
+            @endif
         </div>
-
+    </div>
     @endif
 
 </div>
@@ -475,22 +544,27 @@ document.querySelectorAll('.force-delete-user-form').forEach(form => {
     document.addEventListener("DOMContentLoaded", function() {
         const searchInput = document.getElementById('usersSearchInput');
         if (searchInput) {
-            let typingTimer;
-            const doneTypingInterval = 500;
             
-            // Auto focus and set cursor to end if search is active
-            if(searchInput.value.length > 0) {
-                searchInput.focus();
-                let val = searchInput.value;
-                searchInput.value = '';
-                searchInput.value = val;
+            // Prevent form submission to avoid page reload and URL change
+            if(searchInput.form) {
+                searchInput.form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                });
             }
 
+            // Client-side instant filtering
             searchInput.addEventListener('input', function () {
-                clearTimeout(typingTimer);
-                typingTimer = setTimeout(function() {
-                    searchInput.form.submit();
-                }, doneTypingInterval);
+                const val = this.value.toLowerCase().trim();
+                const rows = document.querySelectorAll('.users-table tbody tr');
+                
+                rows.forEach(row => {
+                    const text = row.innerText.toLowerCase();
+                    if (text.includes(val)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
             });
         }
     });

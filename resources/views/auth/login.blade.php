@@ -5,6 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | {{ $projectSettings->project_name ?? 'Folder Management' }}</title>
     <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
+    <style>
+        .admin-toast {
+            position: fixed; top: 24px; right: 24px; z-index: 9999;
+            background: #fff; border-radius: 8px; padding: 16px 20px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+            display: flex; align-items: flex-start; gap: 14px; min-width: 320px; max-width: 420px;
+            animation: toastSlideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            border-left: 4px solid #10b981;
+        }
+        .admin-toast.toast-error { border-left-color: #ef4444; }
+        .toast-icon { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; }
+        .toast-success .toast-icon { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .toast-error .toast-icon { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .toast-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .toast-content strong { color: #111827; font-size: 15px; font-weight: 600; }
+        .toast-content span { color: #6b7280; font-size: 14px; line-height: 1.4; }
+        .toast-close { background: transparent; border: none; color: #9ca3af; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 4px; transition: 0.2s; }
+        .toast-close:hover { background: #f3f4f6; color: #4b5563; }
+        .toast-progress { position: absolute; bottom: 0; left: 0; height: 3px; background: #10b981; border-radius: 0 0 0 8px; width: 100%; transform-origin: left; animation: toastTimer 2s linear forwards; }
+        .toast-error .toast-progress { background: #ef4444; animation: toastTimer 10s linear forwards; }
+        .admin-toast.toast-hide { animation: toastSlideOut 0.2s ease-in forwards; }
+        @keyframes toastSlideIn { from { transform: translateX(100%) scale(0.9); opacity: 0; } to { transform: translateX(0) scale(1); opacity: 1; } }
+        @keyframes toastSlideOut { from { transform: translateX(0) scale(1); opacity: 1; } to { transform: translateX(110%) scale(0.9); opacity: 0; } }
+        @keyframes toastTimer { 100% { transform: scaleX(0); } }
+    </style>
     @vite(['resources/js/app.js'])
 </head>
 <body>
@@ -55,19 +80,27 @@
                         <p>Enter your email and password to continue.</p>
                     </div>
 
-                    @if(session('success'))
-                        <div class="alert alert-success">
-                            {{ session('success') }}
+                    @if(session('success') || session('error'))
+                    <div class="admin-toast {{ session('success') ? 'toast-success' : 'toast-error' }}" id="adminToast">
+                        <div class="toast-icon">
+                            @if(session('success'))
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+                            @else
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                            @endif
                         </div>
+                        <div class="toast-content">
+                            <strong>{{ session('success') ? 'Success' : 'Error' }}</strong>
+                            <span>{{ session('success') ?? session('error') }}</span>
+                        </div>
+                        <button type="button" class="toast-close" onclick="closeAdminToast()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                        <div class="toast-progress"></div>
+                    </div>
                     @endif
 
-                    @if(session('error'))
-                        <div class="alert alert-danger">
-                            {{ session('error') }}
-                        </div>
-                    @endif
-
-                    <form action="{{ route('login.store') }}" method="POST" class="auth-form">
+                    <form action="{{ route('login.store') }}" method="POST" class="auth-form" id="loginForm" novalidate>
                         @csrf
                         <input type="hidden" name="client_device" id="client_device" value="">
 
@@ -81,7 +114,7 @@
                                 value="{{ old('email', Cookie::get('login_email')) }}"
                                 class="form-control @error('email') is-invalid @enderror"
                                 placeholder="name@example.com"
-                                maxlength="100"
+                                maxlength="50"
                                 autocomplete="email"
                                 autofocus
                             >
@@ -89,6 +122,7 @@
                             @error('email')
                                 <span class="error-message">{{ $message }}</span>
                             @enderror
+                            <span class="error-message js-email-error" style="display:none;">The email field is required.</span>
                         </div>
 
                         <div class="form-group">
@@ -104,6 +138,8 @@
                                     value="{{ Cookie::get('login_password') }}"
                                     class="form-control @error('password') is-invalid @enderror"
                                     placeholder="Enter your password"
+                                    minlength="6"
+                                    maxlength="15"
                                     autocomplete="current-password"
                                 >
                                 <button type="button" class="password-toggle" onclick="togglePasswordVisibility('password', this)" aria-label="Toggle password visibility">
@@ -120,6 +156,7 @@
                             @error('password')
                                 <span class="error-message">{{ $message }}</span>
                             @enderror
+                            <span class="error-message js-password-error" style="display:none;">The password field is required.</span>
                         </div>
 
                         <div class="login-options">
@@ -140,11 +177,6 @@
                             Login
                         </button>
                     </form>
-
-                    <p class="auth-switch">
-                        Don't have an account?
-                        <a href="{{ route('register') }}">Create account</a>
-                    </p>
                 </div>
             </div>
         </section>
@@ -182,13 +214,64 @@
             if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
                 let formGroup = e.target.closest('.form-group');
                 if (formGroup) {
-                    let errorSpan = formGroup.querySelector('.error-message');
-                    if (errorSpan) {
-                        errorSpan.style.display = 'none';
-                    }
+                    let errorSpans = formGroup.querySelectorAll('.error-message');
+                    errorSpans.forEach(span => span.style.display = 'none');
+                }
+                if (e.target.classList.contains('is-invalid')) {
+                    e.target.classList.remove('is-invalid');
                 }
             }
         });
+
+        function closeAdminToast() {
+            var toast = document.getElementById('adminToast');
+            if (!toast) return;
+            toast.classList.add('toast-hide');
+            setTimeout(function () { toast.remove(); }, 200);
+        }
+
+        var adminToastEl = document.getElementById('adminToast');
+        if (adminToastEl) {
+            var isError = adminToastEl.classList.contains('toast-error');
+            var timeoutDuration = isError ? 10000 : 2000;
+            setTimeout(closeAdminToast, timeoutDuration);
+        }
+
+        var loginForm = document.getElementById('loginForm');
+        if(loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                var emailInput = document.getElementById('email');
+                var passwordInput = document.getElementById('password');
+                
+                var email = emailInput.value.trim();
+                var password = passwordInput.value.trim();
+                
+                var emailError = document.querySelector('.js-email-error');
+                var passwordError = document.querySelector('.js-password-error');
+                
+                var hasError = false;
+                if(!email) {
+                    emailError.style.display = 'block';
+                    emailInput.classList.add('is-invalid');
+                    hasError = true;
+                }
+                if(!password) {
+                    passwordError.innerText = "The password field is required.";
+                    passwordError.style.display = 'block';
+                    passwordInput.classList.add('is-invalid');
+                    hasError = true;
+                } else if(password.length < 6) {
+                    passwordError.innerText = "The password must be at least 6 characters.";
+                    passwordError.style.display = 'block';
+                    passwordInput.classList.add('is-invalid');
+                    hasError = true;
+                }
+
+                if(hasError) {
+                    e.preventDefault();
+                }
+            });
+        }
     </script>
 </body>
 </html>

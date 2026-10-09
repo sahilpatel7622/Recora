@@ -28,7 +28,8 @@
         @if($user->trashed())
 
             <form action="{{ route('admin.users.restore', $user->id) }}"
-                  method="POST">
+                  method="POST"
+                  class="restore-user-form">
 
                 @csrf
                 @method('PATCH')
@@ -45,7 +46,7 @@
 
             <form action="{{ route('admin.users.force-delete', $user->id) }}"
                   method="POST"
-                  onsubmit="return confirm('This user will be permanently deleted. Continue?')">
+                  class="force-delete-user-form">
 
                 @csrf
                 @method('DELETE')
@@ -63,7 +64,8 @@
         @else
 
             <form action="{{ route('admin.users.status', $user->id) }}"
-                  method="POST">
+                  method="POST"
+                  class="status-user-form">
 
                 @csrf
                 @method('PATCH')
@@ -89,7 +91,7 @@
 
             <form action="{{ route('admin.users.destroy', $user->id) }}"
                   method="POST"
-                  onsubmit="return confirm('Move this user to deleted users?')">
+                  class="delete-user-form">
 
                 @csrf
                 @method('DELETE')
@@ -338,3 +340,96 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    function submitFormWithoutHistory(form) {
+        const btn = form.querySelector('button[type="submit"]');
+        if(btn) {
+            btn.style.opacity = '0.7';
+            btn.style.pointerEvents = 'none';
+        }
+        
+        fetch(form.action, {
+            method: form.method || 'POST',
+            body: new FormData(form)
+        }).then(res => res.text()).then(html => {
+            document.open();
+            document.write(html);
+            document.close();
+        });
+    }
+
+    document.querySelectorAll('.status-user-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitFormWithoutHistory(form);
+        });
+    });
+
+    document.querySelectorAll('.delete-user-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Delete User?',
+                text: 'Move this user to deleted users?',
+                icon: 'warning',
+                showCancelButton: true,
+                reverseButtons: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#3b82f6',
+                confirmButtonText: 'Yes, delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    submitFormWithoutHistory(form);
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll('.force-delete-user-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Permanently Delete?',
+                text: 'This action cannot be undone. Are you sure?',
+                icon: 'error',
+                showCancelButton: true,
+                reverseButtons: true,
+                confirmButtonColor: '#b91c1c',
+                cancelButtonColor: '#3b82f6',
+                confirmButtonText: 'Yes, permanently delete',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    submitFormWithoutHistory(form);
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll('.restore-user-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Restore User?',
+                text: 'Do you want to restore this user account?',
+                icon: 'question',
+                showCancelButton: true,
+                reverseButtons: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#3b82f6',
+                confirmButtonText: 'Yes, restore',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    submitFormWithoutHistory(form);
+                }
+            });
+        });
+    });
+});
+</script>
+@endpush

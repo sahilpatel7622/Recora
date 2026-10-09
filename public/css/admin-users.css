@@ -9,7 +9,7 @@
     display:flex;
     align-items:center;
     gap:16px;
-    padding:22px;
+    padding:12px 22px;
     background:#fff;
     border:1px solid #e5e7eb;
     border-radius:16px;
@@ -80,7 +80,7 @@
 }
 
 .users-card-header{
-    padding:22px;
+    padding:12px 22px;
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -202,7 +202,7 @@
 }
 
 .users-table td{
-    padding:16px 15px;
+    padding:4px 15px;
     border-bottom:1px solid #f1f5f9;
     font-size:16px;
     color:#374151;
@@ -669,7 +669,7 @@
     display:grid;
     grid-template-columns:repeat(2,1fr);
     gap:16px;
-    padding:22px;
+    padding:12px 22px;
 }
 
 .information-item{
@@ -931,7 +931,6 @@
 
 .user-input-wrapper:has(.input-error),
 .user-select-wrapper:has(.input-error){
-    background:#fef2f2;
     border-color:#ef4444;
 }
 
@@ -1006,3 +1005,7 @@
     background:linear-gradient(135deg,#5b21b6,#6d28d9);
     transform:translateY(-2px);
 }
+
+
+
+.users-table tbody tr:last-child td { border-bottom: none !important; }

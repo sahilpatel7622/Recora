@@ -307,7 +307,6 @@ a {
 
 .form-control.is-invalid {
     border-color: #ef4444;
-    background: #fffafa;
 }
 
 .form-control.is-invalid:focus {

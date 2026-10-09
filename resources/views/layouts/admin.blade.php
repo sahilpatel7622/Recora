@@ -55,13 +55,7 @@
                 </a>
             </li>
 
-            <li>
-                <a href="{{ route('admin.notifications.index') }}"
-                   class="{{ request()->routeIs('admin.notifications*') ? 'active' : '' }}">
-                    <i class="fa-solid fa-bell"></i>
-                    <span>Send Notifications</span>
-                </a>
-            </li>
+
 
             <li>
                 <a href="#"
@@ -116,11 +110,7 @@
 
     <header class="admin-navbar">
 
-        <button type="button"
-                class="admin-mobile-actions-btn"
-                id="adminMobileActionsBtn">
-            <i class="fa-solid fa-bars"></i>
-        </button>
+        
 
         <div class="navbar-heading">
             <h2>@yield('page-title', 'Dashboard Overview')</h2>
@@ -231,7 +221,7 @@
         </div>
 
         <div class="notification-dropdown-footer">
-            <a href="{{ route('admin.notifications.index') }}">Show All</a>
+            <a href="#">Show All</a>
         </div>
 
     </div>
@@ -297,105 +287,7 @@
 
 </div>
 
-<div class="admin-mobile-actions-panel" id="adminMobileActionsPanel">
 
-    <div class="mobile-sidebar-header">
-
-        <a href="{{ route('admin.dashboard') }}"
-           class="mobile-sidebar-brand">
-
-            @if(isset($projectSettings) && $projectSettings->project_logo)
-                <img src="{{ asset('storage/' . $projectSettings->project_logo) }}" alt="Logo" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.1);">
-            @else
-                <div class="mobile-sidebar-brand-icon">
-                    FM
-                </div>
-            @endif
-
-            <div class="mobile-sidebar-brand-text">
-                <h3>{{ $projectSettings->project_name ?? 'Folder Management' }}</h3>
-                <span>Admin Panel</span>
-            </div>
-
-        </a>
-
-        <button type="button"
-                class="mobile-sidebar-close"
-                id="adminMobileActionsClose">
-
-            <i class="fa-solid fa-xmark"></i>
-
-        </button>
-
-    </div>
-
-    <ul class="mobile-sidebar-menu">
-
-        <li class="mobile-sidebar-title">
-            Admin Controls
-        </li>
-        <li>
-            <a href="{{ route('admin.dashboard') }}"
-               class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                <i class="fa-solid fa-gauge-high"></i>
-                <span>Dashboard</span>
-            </a>
-        </li>
-
-        <li>
-            <a href="{{ route('admin.notifications.index') }}"
-               class="{{ request()->routeIs('admin.notifications*') ? 'active' : '' }}">
-                <i class="fa-solid fa-bell"></i>
-                <span>Send Notifications</span>
-            </a>
-        </li>
-
-        <li>
-            <a href="#">
-                <i class="fa-solid fa-user-gear"></i>
-                <span>Profile</span>
-            </a>
-        </li>
-
-    </ul>
-
-    <div style="margin-top: auto; padding: 0 14px 14px;">
-        <div id="mobileMaintenanceBtn"
-             class="mobile-status-indicator {{ $maintenanceStatus ? 'mobile-btn-maintenance' : 'mobile-btn-live' }}"
-             style="display: flex; align-items: center; gap: 13px; padding: 12px 14px; font-size: 16px; font-weight: 500; color: #c7c9d4;">
-            @if($maintenanceStatus)
-                <i class="fa-solid fa-screwdriver-wrench" style="width: 21px; text-align: center; font-size: 16px;"></i>
-                <span>Maintenance</span>
-            @else
-                <i class="fa-solid fa-circle-check" style="width: 21px; text-align: center; font-size: 16px;"></i>
-                <span>Live</span>
-            @endif
-        </div>
-    </div>
-
-    <div class="mobile-sidebar-footer" style="margin-top: 0;">
-
-        <form action="{{ route('admin.logout') }}"
-              method="POST" class="logout-form">
-
-            @csrf
-
-            <button type="submit"
-                    class="mobile-sidebar-logout">
-
-                <i class="fa-solid fa-right-from-bracket"></i>
-                <span>Logout</span>
-
-            </button>
-
-        </form>
-
-    </div>
-
-</div>
-
-<div class="admin-mobile-actions-overlay"
-     id="adminMobileActionsOverlay"></div>
 
 @if(session('success') || session('error'))
 
@@ -475,39 +367,7 @@ updateAdminDateTime();
 setInterval(updateAdminDateTime, 1000);
 window.addEventListener('resize', updateAdminDateTime);
 
-const adminMobileActionsBtn =
-    document.getElementById('adminMobileActionsBtn');
 
-const adminMobileActionsPanel =
-    document.getElementById('adminMobileActionsPanel');
-
-const adminMobileActionsOverlay =
-    document.getElementById('adminMobileActionsOverlay');
-
-const adminMobileActionsClose =
-    document.getElementById('adminMobileActionsClose');
-
-function openAdminMobilePanel() {
-    adminMobileActionsPanel?.classList.add('show');
-    adminMobileActionsOverlay?.classList.add('show');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeAdminMobilePanel() {
-    adminMobileActionsPanel?.classList.remove('show');
-    adminMobileActionsOverlay?.classList.remove('show');
-    document.body.style.overflow = '';
-}
-
-adminMobileActionsBtn?.addEventListener(
-    'click',
-    openAdminMobilePanel
-);
-
-adminMobileActionsClose?.addEventListener(
-    'click',
-    closeAdminMobilePanel
-);
 
 adminMobileActionsOverlay?.addEventListener(
     'click',
@@ -559,18 +419,35 @@ function showAdminToast(message, type = 'success') {
     setTimeout(closeAdminToast, duration);
 }
 
-const adminToast = document.getElementById('adminToast');
+{
+    const adminToastEl = document.getElementById('adminToast');
+    if (adminToastEl) {
+        const isError = adminToastEl.classList.contains('toast-error');
+        const timeoutDuration = isError ? 10000 : 2000;
+        setTimeout(closeAdminToast, timeoutDuration);
+    }
+}
 
-if (adminToast) {
-    const isError = adminToast.classList.contains('toast-error');
-    const timeoutDuration = isError ? 10000 : 2000;
-    setTimeout(closeAdminToast, timeoutDuration);
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+        const toast = document.getElementById('adminToast');
+        if (toast) toast.remove();
+    }
+});
+
+// Extra fallback for browsers that load from disk cache instead of bfcache
+if (window.performance && window.performance.getEntriesByType) {
+    const navEntries = window.performance.getEntriesByType("navigation");
+    if (navEntries.length > 0 && navEntries[0].type === "back_forward") {
+        const toast = document.getElementById('adminToast');
+        if (toast) toast.remove();
+    }
 }
 </script>
 
 <script>
-const desktopMaintenanceBtn = document.getElementById('desktopMaintenanceBtn');
-const mobileMaintenanceBtn = document.getElementById('mobileMaintenanceBtn');
+var desktopMaintenanceBtn = document.getElementById('desktopMaintenanceBtn');
+
 
 function updateMaintenanceUI(status) {
     const isActive = Number(status) === 1;
@@ -585,11 +462,7 @@ function updateMaintenanceUI(status) {
         }
     }
 
-    if (mobileMaintenanceBtn) {
-        if (isActive) {
-            mobileMaintenanceBtn.innerHTML = '<i class="fa-solid fa-screwdriver-wrench" style="width: 21px; text-align: center; font-size: 16px;"></i><span>Maintenance</span>';
-            mobileMaintenanceBtn.className = 'mobile-status-indicator mobile-btn-maintenance';
-        } else {
+     else {
             mobileMaintenanceBtn.innerHTML = '<i class="fa-solid fa-circle-check" style="width: 21px; text-align: center; font-size: 16px;"></i><span>Live</span>';
             mobileMaintenanceBtn.className = 'mobile-status-indicator mobile-btn-live';
         }
@@ -675,10 +548,10 @@ setInterval(getMaintenanceStatus, 2000);
 </script>
 
 <script>
-const adminProfileButton =
+var adminProfileButton =
     document.getElementById('adminProfileButton');
 
-const adminProfileDropdown =
+var adminProfileDropdown =
     document.getElementById('adminProfileDropdown');
 
 adminProfileButton?.addEventListener('click', function (e) {
@@ -727,10 +600,10 @@ document.querySelectorAll('.logout-form').forEach(form => {
 </script>
 
 <script>
-const desktopNotificationBtn =
+var desktopNotificationBtn =
     document.getElementById('desktopNotificationBtn');
 
-const adminNotificationDropdown =
+var adminNotificationDropdown =
     document.getElementById('adminNotificationDropdown');
 
 desktopNotificationBtn?.addEventListener('click', function (e) {
@@ -746,7 +619,7 @@ desktopNotificationBtn?.addEventListener('click', function (e) {
     adminNotificationDropdown?.classList.toggle('show');
 });
 
-const mobileNotificationBtn = document.getElementById('mobileNotificationBtn');
+var mobileNotificationBtn = document.getElementById('mobileNotificationBtn');
 mobileNotificationBtn?.addEventListener('click', function (e) {
     e.stopPropagation();
     // Close sidebar first if open
@@ -773,7 +646,7 @@ document.addEventListener('click', function (e) {
     }
 });
 
-const markAllNotificationsReadBtn = document.getElementById('markAllNotificationsRead');
+var markAllNotificationsReadBtn = document.getElementById('markAllNotificationsRead');
 if (markAllNotificationsReadBtn) {
     markAllNotificationsReadBtn.addEventListener('click', async function(e) {
         e.preventDefault();

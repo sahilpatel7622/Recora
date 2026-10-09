@@ -31,63 +31,6 @@ class AuthController extends Controller
         ]);
     }
 
-    public function showRegister(): View|RedirectResponse
-    {
-        if (Auth::check()) {
-            return $this->redirectByRole(Auth::user());
-        }
-
-        return view('auth.register');
-    }
-
-    public function register(RegisterRequest $request): RedirectResponse
-    {
-        try {
-            DB::beginTransaction();
-
-            $parsed = $this->parseUserAgent((string) $request->userAgent(), (string) ($request->input('client_device') ?: $request->header('sec-ch-ua-model')));
-
-            $user = User::create([
-                'name' => $request->string('name')->toString(),
-                'number' => $request->string('number')->toString(),
-                'email' => $request->string('email')->toString(),
-                'password' => Hash::make($request->password),
-                'role' => 'user',
-                'status' => 1,
-                'action_pass' => null,
-                'last_login_time' => now(),
-                'ip_address' => $request->ip(),
-                'device' => $parsed['device'],
-                'browser' => $parsed['browser'],
-            ]);
-
-            Notification::create([
-                'user_id' => $user->id,
-                'title' => 'New Registration',
-                'message' => $user->name . ' registered a new account.',
-                'type' => 'register',
-                'is_read' => false,
-            ]);
-
-            DB::commit();
-
-            return redirect()
-                ->route('login')
-                ->with('success', 'Registration successful. Please login.');
-        } catch (Throwable $exception) {
-            DB::rollBack();
-
-            report($exception);
-
-            return back()
-                ->withInput($request->except([
-                    'password',
-                    'password_confirmation',
-                ]))
-                ->with('error', 'Registration failed. Please try again.');
-        }
-    }
-
     public function login(LoginRequest $request): RedirectResponse
     {
         $credentials = [
@@ -109,12 +52,17 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
-        if (! $user) {
+        if (! $user || $user->role !== 'admin') {
             Auth::logout();
 
-            return redirect()
-                ->route('login')
-                ->with('error', 'Unable to login. Please try again.');
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()
+                ->withInput($request->only('email', 'remember'))
+                ->withErrors([
+                    'email' => 'Email address or password is incorrect.',
+                ]);
         }
 
         if (! $user->status) {
@@ -123,10 +71,11 @@ class AuthController extends Controller
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
-            return redirect()
-                ->route('login')
-                ->withInput($request->only('email'))
-                ->with('error', 'Your account is inactive. Please contact the administrator.');
+            return back()
+                ->withInput($request->only('email', 'remember'))
+                ->withErrors([
+                    'email' => 'Your account is inactive. Please contact the administrator.',
+                ]);
         }
 
         $parsed = $this->parseUserAgent((string) $request->userAgent(), (string) ($request->input('client_device') ?: $request->header('sec-ch-ua-model')));
@@ -156,7 +105,7 @@ class AuthController extends Controller
             Cookie::queue(Cookie::forget('login_password'));
         }
 
-        return $this->redirectByRole($user);
+        return $this->redirectByRole($user)->with('success', 'You have been logged in successfully.');
     }
 
     public function logout(Request $request): RedirectResponse
@@ -177,9 +126,6 @@ class AuthController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
-        Cookie::queue(Cookie::forget('login_email'));
-        Cookie::queue(Cookie::forget('login_password'));
 
         return redirect()
             ->route('login')

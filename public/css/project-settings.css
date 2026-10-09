@@ -302,3 +302,9 @@
         justify-content: center;
     }
 }
+.input-error { border-color: #ef4444 !important; background: #fef2f2 !important; }
+
+input::placeholder, textarea::placeholder { color: #9ca3af !important; }
+
+.form-group input, .form-group textarea, select { background-color: #f9fafb !important; }
+.form-group input:focus, .form-group textarea:focus, select:focus { background-color: #ffffff !important; }

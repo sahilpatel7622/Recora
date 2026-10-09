@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class UserController extends Controller
 {
@@ -55,9 +56,15 @@ class UserController extends Controller
             });
         }
 
+        $perPage = (int) $request->input('per_page', 10);
+        $allowedPerPage = [10, 25, 50, 100];
+        if (!in_array($perPage, $allowedPerPage, true)) {
+            $perPage = 10;
+        }
+
         $users = $usersQuery
-            ->latest('id')
-            ->paginate(10)
+            ->oldest('id')
+            ->paginate($perPage)
             ->withQueryString();
 
         $totalUsers = User::query()
@@ -181,5 +188,36 @@ class UserController extends Controller
             'success',
             'User permanently deleted successfully.'
         );
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $search = trim((string) $request->input('search'));
+        $filter = $request->input('filter', 'all');
+
+        if ($filter === 'deleted') {
+            $query = User::onlyTrashed()->where('role', '!=', 'admin');
+        } else {
+            $query = User::query()->where('role', '!=', 'admin');
+
+            if ($filter === 'active') {
+                $query->where('status', true);
+            } elseif ($filter === 'inactive') {
+                $query->where('status', false);
+            }
+        }
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'LIKE', '%' . $search . '%')
+                  ->orWhere('email', 'LIKE', '%' . $search . '%')
+                  ->orWhere('number', 'LIKE', '%' . $search . '%');
+            });
+        }
+
+        $users = $query->latest()->get();
+
+        $pdf = Pdf::loadView('admin.users.pdf', compact('users', 'filter'));
+        return $pdf->download('users-export.pdf');
     }
 }
